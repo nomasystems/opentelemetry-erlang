@@ -183,10 +183,12 @@ exporting({timeout, export_logs}, export_logs, _) ->
     {keep_state_and_data, [postpone]};
 exporting(enter, _OldState, _Data) ->
     keep_state_and_data;
+exporting(internal, export, Data=#data{batch=Batch}) when map_size(Batch) =:= 0 ->
+    {next_state, idle, Data};
 exporting(internal, export, Data=#data{exporter=Exporter,
                                        resource=Resource,
                                        config=Config,
-                                       batch=Batch}) when map_size(Batch) =/= 0 ->
+                                       batch=Batch}) ->
     _ = export(Exporter, Resource, Batch, Config),
     {next_state, idle, Data#data{batch=#{}}};
 exporting(EventType, EventContent, Data) ->

@@ -84,7 +84,7 @@ log_record(#{level := Level,
     Attributes = maps:without([gl, time, report_cb], Metadata),
     Attributes1 = maps:fold(fun(K, V, Acc) ->
                                     [#{key => otel_otlp_common:to_binary(K),
-                                       value => otel_otlp_common:to_any_value(V)} | Acc]
+                                       value => to_attribute_value(K, V)} | Acc]
                             end, [], Attributes),
     DroppedAttributesCount = maps:size(Attributes) - length(Attributes1),
     Flags = 0,
@@ -251,3 +251,8 @@ level_to_severity(info)->
     {'SEVERITY_NUMBER_INFO', <<"SEVERITY_NUMBER_INFO">>};
 level_to_severity(debug)->
     {'SEVERITY_NUMBER_DEBUG', <<"SEVERITY_NUMBER_DEBUG">>}.
+
+to_attribute_value(file, V) ->
+    otel_otlp_common:to_any_value(unicode:characters_to_binary(V));
+to_attribute_value(_, V) ->
+    otel_otlp_common:to_any_value(V).
